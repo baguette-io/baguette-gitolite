@@ -1,0 +1,71 @@
+    apiVersion: extensions/v1beta1
+    kind: Deployment
+    metadata:
+      name: baguette-git-and-build
+      namespace: baguette
+      labels:
+        k8s-app: baguette-git-and-build
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          k8s-app: baguette-git-and-build
+      template:
+        metadata:
+          labels:
+            k8s-app: baguette-git-and-build
+        spec:
+          containers:
+          - name: baguette-build
+            image: quay.io/baguette.io/baguette-build:0.10
+            imagePullPolicy: IfNotPresent
+            env:
+            - name: FARINE_INI
+              value: /home/baguette/config/farine.ini
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: aws-ecr
+                  key: aws-access-key-id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aws-ecr
+                  key: aws-secret-access-key
+            volumeMounts:
+            - mountPath: /home/baguette/config
+              name: build-farine
+            - name: docker-socket
+              mountPath: /var/run/docker.sock
+            - name: shared-repositories-git
+              mountPath: /home/baguette/repositories
+          - name: baguette-git
+            image: quay.io/baguette.io/baguette-git:0.10
+            imagePullPolicy: IfNotPresent
+            ports:
+             - containerPort: 22
+            env:
+            - name: FARINE_INI
+              value: /home/baguette/config/farine.ini
+            volumeMounts:
+            - name: git-farine
+              mountPath: /home/baguette/config
+          volumes:
+           - name: build-farine
+             configMap:
+                name: baguette-build
+                items:
+                 - key: config
+                   path: farine.ini
+           - name: git-farine
+             configMap:
+                name: baguette-git
+                items:
+                 - key: config
+                   path: farine.ini
+           - name: docker-socket
+             hostPath:
+               path: /var/run/docker.sock
+           - name: shared-repositories-git
+             persistentVolumeClaim:
+               claimName: home-git-0001

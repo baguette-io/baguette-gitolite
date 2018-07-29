@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+ name: home-git-0001
+ namespace: baguette
+ annotations:
+   volume.beta.kubernetes.io/storage-class: glusterfs
+spec:
+ accessModes:
+  - ReadWriteOnce
+ resources:
+   requests:
+     storage: 29Gi
