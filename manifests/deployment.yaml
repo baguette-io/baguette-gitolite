@@ -42,6 +42,15 @@
           - name: baguette-git
             image: quay.io/baguette.io/baguette-git:0.10
             imagePullPolicy: IfNotPresent
+            env:
+            - name: FARINE_INI
+              value: /home/baguette/config/farine.ini
+            volumeMounts:
+            - name: git-farine
+              mountPath: /home/baguette/config
+          - name: baguette-gitolite
+            image: quay.io/baguette.io/baguette-gitolite:0.10
+            imagePullPolicy: IfNotPresent
             ports:
              - containerPort: 22
             env:
@@ -50,6 +59,8 @@
             volumeMounts:
             - name: git-farine
               mountPath: /home/baguette/config
+            - name: shared-repositories-git
+              mountPath: /home/baguette/repositories
           volumes:
            - name: build-farine
              configMap:

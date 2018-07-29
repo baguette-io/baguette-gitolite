@@ -4,6 +4,8 @@ RUN apk add --no-cache gitolite openssh
 RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin no/g' /etc/ssh/sshd_config
 RUN sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config
 RUN sed -i 's@Subsystem\ssftp\s/usr/lib/ssh/sftp-server@Subsystem sftp no@g' /etc/ssh/sshd_config
+# For the hooks
+RUN pip install baguette-messaging
 # Entrypoint
 COPY ./entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
